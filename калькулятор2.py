@@ -238,21 +238,23 @@ def sh_func(x):
         rs = rs @ r1 @ r2 @ ms1 @ R1 @ R2 @ r3 @ r4 @ ms2 @ R3 @ R4 @ r5 @ r6 @ ms3 @ R5 @ R6 @ r7 @ r8 @ ms4 @ R7 @ R8
 
     return rs
-bnds = []
-for i in range(L*40):
-    bnds.append((-np.pi, np.pi))
-bnds = np.array(bnds)
-guess = []
-for i in range(L * 40):
-    guess.append(random.randint(-1000, 1000) / 1000 * np.pi)
-    #guess.append(2)
-guess = np.array(guess)
-res1 = scipy.optimize.minimize(func, guess, bounds=bnds)
-print(res1)
-#print('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
-print(list(res1.x))
 
-printm(sh_func(res1.x))
+for _ in range(10):
+    bnds = []
+    for i in range(L*40):
+        bnds.append((-np.pi, np.pi))
+    bnds = np.array(bnds)
+    guess = []
+    for i in range(L * 40):
+        guess.append(random.randint(-1000, 1000) / 1000 * np.pi)
+        #guess.append(2)
+    guess = np.array(guess)
+    res1 = scipy.optimize.minimize(func, guess, bounds=bnds)
+    print(res1)
+    #print('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
+    print(list(res1.x))
+
+#printm(sh_func(res1.x))
 
 
 

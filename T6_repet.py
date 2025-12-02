@@ -1,4 +1,3 @@
-
 import cirq
 import networkx as nx
 import numpy as np
@@ -9,16 +8,16 @@ from scipy import linalg
 from cirq import protocols
 from cirq.testing import gate_features
 import random
+
 N = 5000
 PMS1 = 0.999
 PMS2 = 0.99
 
-
 T0 = 25
 
-zZ = np.array([[1,0,0]]).T
-eE = np.array([[0,1,0]]).T
-fF = np.array([[0,0,1]]).T
+zZ = np.array([[1, 0, 0]]).T
+eE = np.array([[0, 1, 0]]).T
+fF = np.array([[0, 0, 1]]).T
 A = [zZ, eE, fF]
 
 B = []
@@ -28,24 +27,21 @@ for i1 in range(3):
             for i4 in range(3):
                 B.append(np.kron(np.kron(np.kron(A[i1], A[i2]), A[i3]), A[i4]))
 
-
-
-
-
-
-X = np.array([[0,1,0], [1,0,0], [0,0,1]])
-Y = np.array([[0,complex(0,-1), 0], [complex(0,1), 0, 0], [0,0,1]])
-Z = np.array([[1,0,0],[0,-1,0], [0,0,1]])
+X = np.array([[0, 1, 0], [1, 0, 0], [0, 0, 1]])
+Y = np.array([[0, complex(0, -1), 0], [complex(0, 1), 0, 0], [0, 0, 1]])
+Z = np.array([[1, 0, 0], [0, -1, 0], [0, 0, 1]])
 id = np.eye(3)
 
-z = np.array([[1,0,0]]).T
-e = np.array([[0,1,0]]).T
-f = np.array([[0,0,1]]).T
-basis = [z,e,f]
+z = np.array([[1, 0, 0]]).T
+e = np.array([[0, 1, 0]]).T
+f = np.array([[0, 0, 1]]).T
+basis = [z, e, f]
 paulies1 = [id, X, Y, Z]
+
 
 def dag(matrix):
     return np.conj(matrix.T)
+
 
 def EE(bas, i, j, p0, paulies, pinv):
     v1 = bas[i]
@@ -54,26 +50,26 @@ def EE(bas, i, j, p0, paulies, pinv):
     x = paulies[1]
     y = paulies[2]
     z = paulies[3]
-    K0 = (1-p0)**0.5  * id
-    #K0 = id
-    K1 = p0**0.5 / 3**0.5 * x
-    #K1 = x
-    K2 = p0**0.5 / 3**0.5 * y
-    #K2 = y
-    K3 = p0 ** 0.5 / 3**0.5 * z
-    #K3 = z
-    #mat_sum = K0 @ dag(K0) + K1 @ dag(K1) + K2 @ dag(K2) + K3 @ dag(K3)
-    #print(mat_sum)
-    #print(np.trace(mat_sum))
-    #print()
-    #print(dag(K3))
+    K0 = (1 - p0) ** 0.5 * id
+    # K0 = id
+    K1 = p0 ** 0.5 / 3 ** 0.5 * x
+    # K1 = x
+    K2 = p0 ** 0.5 / 3 ** 0.5 * y
+    # K2 = y
+    K3 = p0 ** 0.5 / 3 ** 0.5 * z
+    # K3 = z
+    # mat_sum = K0 @ dag(K0) + K1 @ dag(K1) + K2 @ dag(K2) + K3 @ dag(K3)
+    # print(mat_sum)
+    # print(np.trace(mat_sum))
+    # print()
+    # print(dag(K3))
     _rho = v1 @ (v2.T)
-    #print(_rho)
+    # print(_rho)
     if i == 0 and j == 0:
         ksgfsg = 0
-        #print('eij', K0 @ _rho @ dag(K0) + K1 @ _rho @ dag(K1) + K2 @ _rho @ dag(K2) + K3 @ _rho @ dag(K3))
-    #print('ee', np.trace(K0 @ _rho @ dag(K0) + K1 @ _rho @ dag(K1) + K2 @ _rho @ dag(K2) + K3 @ _rho @ dag(K3)))
-    #print()
+        # print('eij', K0 @ _rho @ dag(K0) + K1 @ _rho @ dag(K1) + K2 @ _rho @ dag(K2) + K3 @ _rho @ dag(K3))
+    # print('ee', np.trace(K0 @ _rho @ dag(K0) + K1 @ _rho @ dag(K1) + K2 @ _rho @ dag(K2) + K3 @ _rho @ dag(K3)))
+    # print()
     return (K0 @ _rho @ dag(K0) + K1 @ _rho @ dag(K1) + K2 @ _rho @ dag(K2) + K3 @ _rho @ dag(K3))
 
 
@@ -84,26 +80,27 @@ def E(bas, i, j, p0, paulies):
     x = paulies[1]
     y = paulies[2]
     z = paulies[3]
-    #K0 = (1-p0)**0.5 * id
+    # K0 = (1-p0)**0.5 * id
     K0 = id / 2
-    #K1 = p0**0.5 / 3**0.5 * x
+    # K1 = p0**0.5 / 3**0.5 * x
     K1 = x / 2
-    #K2 = p0**0.5 / 3**0.5 * y
+    # K2 = p0**0.5 / 3**0.5 * y
     K2 = y / 2
-    #K3 = p0 ** 0.5 / 3**0.5 * z
+    # K3 = p0 ** 0.5 / 3**0.5 * z
     K3 = z / 2
-    #mat_sum = K0 @ dag(K0) + K1 @ dag(K1) + K2 @ dag(K2) + K3 @ dag(K3)
-    #print(mat_sum)
-    #print()
-    #print(dag(K3))
+    # mat_sum = K0 @ dag(K0) + K1 @ dag(K1) + K2 @ dag(K2) + K3 @ dag(K3)
+    # print(mat_sum)
+    # print()
+    # print(dag(K3))
     _rho = v1 @ (v2.T)
 
-    #print(_rho)
+    # print(_rho)
     if i == 0 and j == 0:
         cgjjjfjk = 0
-    #print('e', np.trace(K0 @ _rho @ dag(K0) + K1 @ _rho @ dag(K1) + K2 @ _rho @ dag(K2) + K3 @ _rho @ dag(K3)))
-    #print()
+    # print('e', np.trace(K0 @ _rho @ dag(K0) + K1 @ _rho @ dag(K1) + K2 @ _rho @ dag(K2) + K3 @ _rho @ dag(K3)))
+    # print()
     return K0 @ _rho @ dag(K0) + K1 @ _rho @ dag(K1) + K2 @ _rho @ dag(K2) + K3 @ _rho @ dag(K3)
+
 
 def nice_repr(parameter):
     """Nice parameter representation
@@ -191,7 +188,8 @@ class QuditRGate(QuditGate):
         return cirq.protocols.is_parameterized(any((self.theta, self.phi)))
 
     def _resolve_parameters_(self, resolver: 'cirq.ParamResolver', recursive: bool):
-        return self.__class__(self.l1, self.l2, resolver.value_of(self.theta, recursive), resolver.value_of(self.phi, recursive), dimension=self.d)
+        return self.__class__(self.l1, self.l2, resolver.value_of(self.theta, recursive),
+                              resolver.value_of(self.phi, recursive), dimension=self.d)
 
     def _circuit_diagram_info_(self, args):
         self.symbol = 'R'
@@ -284,6 +282,7 @@ class QuditArbitraryUnitary(QuditGate):
     def _unitary_(self):
         return self.unitary
 
+
 '''
 if __name__ == '__main__':
     n = 3  # number of qudits
@@ -332,7 +331,7 @@ class QutritDepolarizingChannel(QuditGate):
         #print((1 / self.d ** 2))
 
         # Choi matrix initialization
-      
+
 
         if p_matrix is None:
             self.p_matrix = self.p1 / (self.d ** 2) * np.ones((self.d, self.d))
@@ -374,35 +373,33 @@ class QutritDepolarizingChannel(QuditGate):
 '''
 
 
-
-#деполяризующий
+# деполяризующий
 class QutritDepolarizingChannel(QuditGate):
 
-    def __init__(self,PP, p_matrix=None):
+    def __init__(self, PP, p_matrix=None):
         super().__init__(dimension=3, num_qubits=1)
 
         # Calculation of the parameter p based on average experimental error of single qudit gate
         f1 = 0.9
         self.p1 = (1 - f1) / (1 - 1 / self.d ** 2)
         self.p1 = PP
-        #print(self.d)
-        #print((1 / self.d ** 2))
+        # print(self.d)
+        # print((1 / self.d ** 2))
 
         # Choi matrix initialization
-        
+
         if p_matrix is None:
             self.p_matrix = (1 - self.p1) / (self.d ** 2) * np.ones((self.d, self.d))
             self.p_matrix = np.zeros_like(self.p_matrix)
-            #self.p_matrix = np.ones((self.d, self.d))
+            # self.p_matrix = np.ones((self.d, self.d))
         else:
             self.p_matrix = p_matrix
-        #self.p_matrix[0, 0] += (1 - self.p1)  # identity probability
+        # self.p_matrix[0, 0] += (1 - self.p1)  # identity probability
         for o in range(3):
             for oo in range(3):
-                #self.p_matrix[o, oo] = 1 / np.trace(E(basis, o, oo, self.p1, paulies1))
+                # self.p_matrix[o, oo] = 1 / np.trace(E(basis, o, oo, self.p1, paulies1))
                 self.p_matrix[o, oo] = 1 / 9
-        #self.p_matrix[0, 0] += 1
-        
+        # self.p_matrix[0, 0] += 1
 
         if p_matrix is None:
             self.p_matrix = self.p1 / (self.d ** 2) * np.ones((self.d, self.d))
@@ -410,10 +407,10 @@ class QutritDepolarizingChannel(QuditGate):
             self.p_matrix = p_matrix
         self.p_matrix[0, 0] += (1 - self.p1)  # identity probability
         self.p_matrix = np.array([[(1 - self.p1), self.p1 / 3], [self.p1 / 3, self.p1 / 3]])
-        #print('prob[0,0]', self.p_matrix[0, 0])
-        #print('prob_sum', self.p_matrix.sum())
+        # print('prob[0,0]', self.p_matrix[0, 0])
+        # print('prob_sum', self.p_matrix.sum())
 
-        #print('prob_sum', self.p_matrix.sum())
+        # print('prob_sum', self.p_matrix.sum())
 
     def _mixture_(self):
         ps = []
@@ -421,10 +418,10 @@ class QutritDepolarizingChannel(QuditGate):
             for j in range(self.d):
                 pinv = np.linalg.inv(self.p_matrix)
                 op = E(basis, i, j, self.p1, paulies1)
-                #print(np.trace(op))
+                # print(np.trace(op))
                 ps.append(op)
-        #print('total_sum', (np.trace(np.array(ps)) * self.p_matrix).sum())
-        #chm = np.kron(np.ones(3), ps)
+        # print('total_sum', (np.trace(np.array(ps)) * self.p_matrix).sum())
+        # chm = np.kron(np.ones(3), ps)
         X = np.array([[0, 1, 0], [1, 0, 0], [0, 0, 1]])
         Y = np.array([[0, complex(0, -1), 0], [complex(0, 1), 0, 0], [0, 0, 1]])
         Z = np.array([[1, 0, 0], [0, -1, 0], [0, 0, 1]])
@@ -434,8 +431,6 @@ class QutritDepolarizingChannel(QuditGate):
 
     def _circuit_diagram_info_(self, args):
         return f"Φ(p1={self.p1:.3f})"
-
-
 
 
 '''
@@ -453,7 +448,7 @@ class QutritDepolarizingChannel(QuditGate):
         #print((1 / self.d ** 2))
 
         # Choi matrix initialization
-       
+
 
         if p_matrix is None:
             self.p_matrix = self.p1 / (self.d ** 2) * np.ones((self.d, self.d))
@@ -496,15 +491,15 @@ class QutritDepolarizingChannel(QuditGate):
 
 class QutritAmplitudeChannel(QuditGate):
 
-    def __init__(self,PP, p_matrix=None):
+    def __init__(self, PP, p_matrix=None):
         super().__init__(dimension=3, num_qubits=1)
 
         # Calculation of the parameter p based on average experimental error of single qudit gate
         f1 = 0.9
         self.p1 = (1 - f1) / (1 - 1 / self.d ** 2)
         self.p1 = PP
-        #print(self.d)
-        #print((1 / self.d ** 2))
+        # print(self.d)
+        # print((1 / self.d ** 2))
 
         # Choi matrix initialization
         '''
@@ -528,10 +523,10 @@ class QutritAmplitudeChannel(QuditGate):
             self.p_matrix = p_matrix
         self.p_matrix[0, 0] += (1 - self.p1)  # identity probability
         self.p_matrix = np.array([[(1 - self.p1), self.p1 / 3], [self.p1 / 3, self.p1 / 3]])
-        #print('prob[0,0]', self.p_matrix[0, 0])
-        #print('prob_sum', self.p_matrix.sum())
+        # print('prob[0,0]', self.p_matrix[0, 0])
+        # print('prob_sum', self.p_matrix.sum())
 
-        #print('prob_sum', self.p_matrix.sum())
+        # print('prob_sum', self.p_matrix.sum())
 
     def _mixture_(self):
         ps = []
@@ -539,29 +534,22 @@ class QutritAmplitudeChannel(QuditGate):
             for j in range(self.d):
                 pinv = np.linalg.inv(self.p_matrix)
                 op = E(basis, i, j, self.p1, paulies1)
-                #print(np.trace(op))
+                # print(np.trace(op))
                 ps.append(op)
-        #print('total_sum', (np.trace(np.array(ps)) * self.p_matrix).sum())
-        #chm = np.kron(np.ones(3), ps)
+        # print('total_sum', (np.trace(np.array(ps)) * self.p_matrix).sum())
+        # chm = np.kron(np.ones(3), ps)
         X = np.array([[0, 1, 0], [1, 0, 0], [0, 0, 1]])
         Y = np.array([[0, complex(0, -1), 0], [complex(0, 1), 0, 0], [0, 0, 1]])
         Z = np.array([[1, 0, 0], [0, -1, 0], [0, 0, 1]])
-        Ea1 = np.array([[1, 0, 0], [0, (1-self.p1)**0.5, 0], [0, 0, (1-self.p1)**0.5]])
-        Ea2 = np.array([[0, self.p1**0.5, 0], [0, 0, 0], [0, 0, 0]])
-        Ea3 = np.array([[0, 0, self.p1**0.5], [0, 0, 0], [0, 0, 0]])
+        Ea1 = np.array([[1, 0, 0], [0, (1 - self.p1) ** 0.5, 0], [0, 0, (1 - self.p1) ** 0.5]])
+        Ea2 = np.array([[0, self.p1 ** 0.5, 0], [0, 0, 0], [0, 0, 0]])
+        Ea3 = np.array([[0, 0, self.p1 ** 0.5], [0, 0, 0], [0, 0, 0]])
         id = np.eye(3)
         shiz_massiv = [Ea1, Ea2, Ea3]
         return tuple(zip(self.p_matrix.flatten(), shiz_massiv))
 
     def _circuit_diagram_info_(self, args):
         return f"Φ(p1={self.p1:.3f})"
-
-
-
-
-
-
-
 
 
 def adde(circuit, gate, qud, ind):
@@ -678,40 +666,10 @@ class TwoQuditMSGate3(gate_features.TwoQubitGate
                           'XX0101'))
 
 
-class U_press(gate_features.TwoQubitGate
-                      ):
-
-    def _json_dict_(self):
-        return {
-            'cirq_type': self.__class__.__name__
-        }
-
-    @classmethod
-    def _from_json_dict_(cls, **kwargs):
-        return cls()
-
-    def _qid_shape_(self):
-        return (3, 3, 3,)
-
-    def _unitary_(self):
-        matrix = make_ms_matrix(0, np.pi / 2)
-        return matrix
-
-    def num_controls(self):
-        return 2
-
-    def _circuit_diagram_info_(self, args: 'cirq.CircuitDiagramInfoArgs'
-                               ) -> 'cirq.CircuitDiagramInfo':
-        return protocols.CircuitDiagramInfo(
-            wire_symbols=('XX0101',
-                          'XX0101'))
-
-
 class U(cirq.Gate):
     def __init__(self, mat, diag_i='R'):
         self.mat = mat
         self.diag_info = diag_i
-
 
     def _qid_shape_(self):
         return (3,)
@@ -727,28 +685,28 @@ def U1(cirquit, q1, q2):
     u1 = U(R(0, -np.pi, 1, 2), 'Rx(-π)12')
     u2 = U(R(np.pi / 2, np.pi / 2, 0, 1), 'Ry(π/2)01')
     u6 = U(R(np.pi / 2, -np.pi, 0, 2), 'Ry(-π)02')
-    #cirquit.append([u1(q1), u6(q2)], strategy=InsertStrategy.INLINE)
+    # cirquit.append([u1(q1), u6(q2)], strategy=InsertStrategy.INLINE)
     adde(cirquit, [u1, u6], [q1, q2], 1)
-    #cirquit.append([u2(q1)], strategy=InsertStrategy.INLINE)
+    # cirquit.append([u2(q1)], strategy=InsertStrategy.INLINE)
     adde(cirquit, [u2], [q1], 1)
     xx = TwoQuditMSGate3()
-    #cirquit.append([xx(q1, q2)], strategy=InsertStrategy.INLINE)
-    #error(cirquit, [q1, q2], PMS)
+    # cirquit.append([xx(q1, q2)], strategy=InsertStrategy.INLINE)
+    # error(cirquit, [q1, q2], PMS)
     adde(cirquit, [xx], [q1, q2], 2)
+
 
 def U1_clear(cirquit, q1, q2):
     u1 = U(R(0, -np.pi, 1, 2), 'Rx(-π)12')
     u2 = U(R(np.pi / 2, np.pi / 2, 0, 1), 'Ry(π/2)01')
     u6 = U(R(np.pi / 2, -np.pi, 0, 2), 'Ry(-π)02')
     cirquit.append([u1(q1), u6(q2)], strategy=InsertStrategy.INLINE)
-    #adde(cirquit, [u1, u6], [q1, q2], 1)
+    # adde(cirquit, [u1, u6], [q1, q2], 1)
     cirquit.append([u2(q1)], strategy=InsertStrategy.INLINE)
-    #adde(cirquit, [u2], [q1], 1)
+    # adde(cirquit, [u2], [q1], 1)
     xx = TwoQuditMSGate3()
     cirquit.append([xx(q1, q2)], strategy=InsertStrategy.INLINE)
-    #error(cirquit, [q1, q2], PMS)
-    #adde(cirquit, [xx], [q1, q2], 2)
-
+    # error(cirquit, [q1, q2], PMS)
+    # adde(cirquit, [xx], [q1, q2], 2)
 
 
 def U1_c(cirquit, q1, q2):
@@ -756,13 +714,14 @@ def U1_c(cirquit, q1, q2):
     u2 = U(R(np.pi / 2, -np.pi / 2, 0, 1), 'Ry(-π/2)01')
     u6 = U(R(np.pi / 2, np.pi, 0, 2), 'Ry(π)02')
     xx_c = TwoQuditMSGate3_c()
-    #cirquit.append([xx_c(q1, q2)], strategy=InsertStrategy.INLINE)
+    # cirquit.append([xx_c(q1, q2)], strategy=InsertStrategy.INLINE)
     adde(cirquit, [xx_c], [q1, q2], 2)
-    #error(cirquit, [q1, q2], PMS)
+    # error(cirquit, [q1, q2], PMS)
     adde(cirquit, [u2], [q1], 1)
-    #cirquit.append([u2(q1)], strategy=InsertStrategy.INLINE)
+    # cirquit.append([u2(q1)], strategy=InsertStrategy.INLINE)
     adde(cirquit, [u1, u6], [q1, q2], 1)
-    #cirquit.append([u1(q1), u6(q2)], strategy=InsertStrategy.INLINE)
+    # cirquit.append([u1(q1), u6(q2)], strategy=InsertStrategy.INLINE)
+
 
 def U1_c_clear(cirquit, q1, q2):
     u1 = U(R(0, np.pi, 1, 2), 'Rx(π)12')
@@ -770,12 +729,13 @@ def U1_c_clear(cirquit, q1, q2):
     u6 = U(R(np.pi / 2, np.pi, 0, 2), 'Ry(π)02')
     xx_c = TwoQuditMSGate3_c()
     cirquit.append([xx_c(q1, q2)], strategy=InsertStrategy.INLINE)
-    #adde(cirquit, [xx_c], [q1, q2], 2)
-    #error(cirquit, [q1, q2], PMS)
-    #adde(cirquit, [u2], [q1], 1)
+    # adde(cirquit, [xx_c], [q1, q2], 2)
+    # error(cirquit, [q1, q2], PMS)
+    # adde(cirquit, [u2], [q1], 1)
     cirquit.append([u2(q1)], strategy=InsertStrategy.INLINE)
-    #adde(cirquit, [u1, u6], [q1, q2], 1)
+    # adde(cirquit, [u1, u6], [q1, q2], 1)
     cirquit.append([u1(q1), u6(q2)], strategy=InsertStrategy.INLINE)
+
 
 def CX_clear(cirquit, q1, q2):
     u1 = U(R(0, -np.pi, 1, 2), 'Rx(-π)12')
@@ -783,17 +743,17 @@ def CX_clear(cirquit, q1, q2):
     u3 = U(R(0, -np.pi, 0, 1), 'Rx(-π)01')
     u4 = U(R(np.pi / 2, -np.pi / 2, 0, 1), 'Ry(-π/2)01')
     u5 = U(R(0, np.pi, 1, 2), 'Rx(π)12')
-    #adde(cirquit, [u1], [q1], 1)
-    #adde(cirquit, [u2], [q1], 1)
+    # adde(cirquit, [u1], [q1], 1)
+    # adde(cirquit, [u2], [q1], 1)
     cirquit.append([u1(q1)], strategy=InsertStrategy.INLINE)
     cirquit.append([u2(q1)], strategy=InsertStrategy.INLINE)
     xx = TwoQuditMSGate3()
-    #adde(cirquit, [xx], [q1, q2], 2)
+    # adde(cirquit, [xx], [q1, q2], 2)
     cirquit.append([xx(q1, q2)], strategy=InsertStrategy.INLINE)
-    #error(cirquit, [q1, q2], 2)
-    #adde(cirquit, [u3, u3], [q1, q2], 1)
-    #adde(cirquit, [u4], [q1], 1)
-    #adde(cirquit, [u5], [q1], 1)
+    # error(cirquit, [q1, q2], 2)
+    # adde(cirquit, [u3, u3], [q1, q2], 1)
+    # adde(cirquit, [u4], [q1], 1)
+    # adde(cirquit, [u5], [q1], 1)
     cirquit.append([u3(q1), u3(q2)], strategy=InsertStrategy.INLINE)
     cirquit.append([u4(q1)], strategy=InsertStrategy.INLINE)
     cirquit.append([u5(q1)], strategy=InsertStrategy.INLINE)
@@ -807,19 +767,18 @@ def CX(cirquit, q1, q2):
     u5 = U(R(0, np.pi, 1, 2), 'Rx(π)12')
     adde(cirquit, [u1], [q1], 1)
     adde(cirquit, [u2], [q1], 1)
-    #cirquit.append([u1(q1)], strategy=InsertStrategy.INLINE)
-    #cirquit.append([u2(q1)], strategy=InsertStrategy.INLINE)
+    # cirquit.append([u1(q1)], strategy=InsertStrategy.INLINE)
+    # cirquit.append([u2(q1)], strategy=InsertStrategy.INLINE)
     xx = TwoQuditMSGate3()
     adde(cirquit, [xx], [q1, q2], 2)
-    #cirquit.append([xx(q1, q2)], strategy=InsertStrategy.INLINE)
-    #error(cirquit, [q1, q2], 2)
+    # cirquit.append([xx(q1, q2)], strategy=InsertStrategy.INLINE)
+    # error(cirquit, [q1, q2], 2)
     adde(cirquit, [u3, u3], [q1, q2], 1)
     adde(cirquit, [u4], [q1], 1)
     adde(cirquit, [u5], [q1], 1)
-    #cirquit.append([u3(q1), u3(q2)], strategy=InsertStrategy.INLINE)
-    #cirquit.append([u4(q1)], strategy=InsertStrategy.INLINE)
-    #cirquit.append([u5(q1)], strategy=InsertStrategy.INLINE)
-
+    # cirquit.append([u3(q1), u3(q2)], strategy=InsertStrategy.INLINE)
+    # cirquit.append([u4(q1)], strategy=InsertStrategy.INLINE)
+    # cirquit.append([u5(q1)], strategy=InsertStrategy.INLINE)
 
 
 def CCX(cirquit, q1, q2, q3):
@@ -830,18 +789,19 @@ def CCX(cirquit, q1, q2, q3):
 
 def CZ(cirquit, q1, q2):
     h = H()
-    #cirquit.append(h(q2), strategy=InsertStrategy.INLINE)
+    # cirquit.append(h(q2), strategy=InsertStrategy.INLINE)
     adde(cirquit, [h], [q2], 1)
     CX(cirquit, q1, q2)
-    #cirquit.append(h(q2), strategy=InsertStrategy.INLINE)
+    # cirquit.append(h(q2), strategy=InsertStrategy.INLINE)
     adde(cirquit, [h], [q2], 1)
+
 
 def CCZ(cirquit, q1, q2, q3):
     h = H()
-    #cirquit.append(h(q3), strategy=InsertStrategy.INLINE)
+    # cirquit.append(h(q3), strategy=InsertStrategy.INLINE)
     adde(cirquit, [h], [q3], 1)
     CCX(cirquit, q1, q2, q3)
-    #cirquit.append(h(q3), strategy=InsertStrategy.INLINE)
+    # cirquit.append(h(q3), strategy=InsertStrategy.INLINE)
     adde(cirquit, [h], [q3], 1)
 
 
@@ -880,7 +840,6 @@ class X2_conj(cirq.Gate):
         return 'X2_c'
 
 
-
 class Z1(cirq.Gate):
     def _qid_shape_(self):
         return (3,)
@@ -891,12 +850,13 @@ class Z1(cirq.Gate):
     def _circuit_diagram_info_(self, args):
         return 'Z1'
 
+
 class Y1(cirq.Gate):
     def _qid_shape_(self):
         return (3,)
 
     def _unitary_(self):
-        return R(np.pi /2, np.pi, 0, 1)
+        return R(np.pi / 2, np.pi, 0, 1)
 
     def _circuit_diagram_info_(self, args):
         return 'Y1'
@@ -921,30 +881,31 @@ class X1(cirq.Gate):
         return R(0, np.pi, 0, 1)
 
     def _circuit_diagram_info_(self, args):
-
         return 'X1'
+
 
 def encoding_qubit(circuit, log_qubit):
     x = X1()
     h = H()
     q1, q2, q3, q4, q5 = log_qubit[0], log_qubit[1], log_qubit[2], log_qubit[3], log_qubit[4]
-    #gates = [h(q2), h(q3), h(q4)]
+    # gates = [h(q2), h(q3), h(q4)]
     adde(circuit, [h, h, h], [q2, q3, q4], 1)
-    #circuit.append(gates, strategy=InsertStrategy.INLINE)
+    # circuit.append(gates, strategy=InsertStrategy.INLINE)
     CCZ(circuit, q1, q3, q4)
-    #gates = [x(q3), x(q4)]
+    # gates = [x(q3), x(q4)]
     adde(circuit, [x, x], [q3, q4], 1)
-    #circuit.append(gates, strategy=InsertStrategy.INLINE)
+    # circuit.append(gates, strategy=InsertStrategy.INLINE)
     CCZ(circuit, q4, q3, q1)
-    #gates = [x(q3), x(q4)]
+    # gates = [x(q3), x(q4)]
     adde(circuit, [x, x], [q3, q4], 1)
-    #circuit.append(gates, strategy=InsertStrategy.INLINE)
+    # circuit.append(gates, strategy=InsertStrategy.INLINE)
     CX(circuit, q1, q5)
     CX(circuit, q2, q5)
     CX(circuit, q2, q1)
     CX(circuit, q4, q1)
     CX(circuit, q3, q5)
     CZ(circuit, q4, q5)
+
 
 def decoding_qubit(circuit, log_qubit):
     x = X1()
@@ -956,37 +917,40 @@ def decoding_qubit(circuit, log_qubit):
     CX(circuit, q2, q1)
     CX(circuit, q2, q5)
     CX(circuit, q1, q5)
-    #gates = [x(q3), x(q4)]
+    # gates = [x(q3), x(q4)]
     adde(circuit, [x, x], [q3, q4], 1)
-    #circuit.append(gates, strategy=InsertStrategy.INLINE)
+    # circuit.append(gates, strategy=InsertStrategy.INLINE)
     CCZ(circuit, q1, q3, q4)
-    #gates = [x(q3), x(q4)]
+    # gates = [x(q3), x(q4)]
     adde(circuit, [x, x], [q3, q4], 1)
-    #circuit.append(gates, strategy=InsertStrategy.INLINE)
+    # circuit.append(gates, strategy=InsertStrategy.INLINE)
     CCZ(circuit, q1, q3, q4)
-    #gates = [h(q2), h(q3), h(q4)]
-    adde(circuit, [h,h,h], [q2, q3, q4], 1)
-    #circuit.append(gates, strategy=InsertStrategy.INLINE)
+    # gates = [h(q2), h(q3), h(q4)]
+    adde(circuit, [h, h, h], [q2, q3, q4], 1)
+    # circuit.append(gates, strategy=InsertStrategy.INLINE)
+
 
 def XZZXI(cirquit, qudits, a1):
     h = H()
     cirquit.append([h(a1)], strategy=InsertStrategy.INLINE)
     CX(cirquit, a1, qudits[0])
-    CZ(cirquit,  a1, qudits[1])
+    CZ(cirquit, a1, qudits[1])
     CZ(cirquit, a1, qudits[2])
     CX(cirquit, a1, qudits[3])
     cirquit.append([h(a1)], strategy=InsertStrategy.INLINE)
     cirquit.append([cirq.measure(a1)])
 
+
 def ZZXIX(cirquit, qudits, a1):
     h = H()
     cirquit.append([h(a1)], strategy=InsertStrategy.INLINE)
-    CZ(cirquit,  a1, qudits[0])
+    CZ(cirquit, a1, qudits[0])
     CZ(cirquit, a1, qudits[1])
     CX(cirquit, a1, qudits[2])
     CX(cirquit, a1, qudits[4])
     cirquit.append([h(a1)], strategy=InsertStrategy.INLINE)
     cirquit.append([cirq.measure(a1)])
+
 
 def XXIZX(cirquit, qudits, a1):
     h = H()
@@ -998,6 +962,7 @@ def XXIZX(cirquit, qudits, a1):
     cirquit.append([h(a1)], strategy=InsertStrategy.INLINE)
     cirquit.append([cirq.measure(a1)])
 
+
 def IXXXZ(cirquit, qudits, a1):
     h = H()
     cirquit.append([h(a1)], strategy=InsertStrategy.INLINE)
@@ -1008,15 +973,17 @@ def IXXXZ(cirquit, qudits, a1):
     cirquit.append([h(a1)], strategy=InsertStrategy.INLINE)
     cirquit.append([cirq.measure(a1)])
 
+
 def XZZXI_r(cirquit, qudits, a1):
     h = H()
     cirquit.append([h(a1)], strategy=InsertStrategy.INLINE)
     CX(cirquit, a1, qudits[3])
     CZ(cirquit, a1, qudits[2])
-    CZ(cirquit,  a1, qudits[1])
+    CZ(cirquit, a1, qudits[1])
     CX(cirquit, a1, qudits[0])
     cirquit.append([h(a1)], strategy=InsertStrategy.INLINE)
     cirquit.append([cirq.measure(a1)])
+
 
 def ZZXIX_r(cirquit, qudits, a1):
     h = H()
@@ -1028,6 +995,7 @@ def ZZXIX_r(cirquit, qudits, a1):
     cirquit.append([h(a1)], strategy=InsertStrategy.INLINE)
     cirquit.append([cirq.measure(a1)])
 
+
 def XXIZX_r(cirquit, qudits, a1):
     h = H()
     cirquit.append([h(a1)], strategy=InsertStrategy.INLINE)
@@ -1038,6 +1006,7 @@ def XXIZX_r(cirquit, qudits, a1):
     cirquit.append([h(a1)], strategy=InsertStrategy.INLINE)
     # cirquit.append([cirq.measure(a1)])
 
+
 def IXXXZ_r(cirquit, qudits, a1):
     h = H()
     cirquit.append([h(a1)], strategy=InsertStrategy.INLINE)
@@ -1047,6 +1016,7 @@ def IXXXZ_r(cirquit, qudits, a1):
     CX(cirquit, a1, qudits[1])
     cirquit.append([h(a1)], strategy=InsertStrategy.INLINE)
     cirquit.append([cirq.measure(a1)])
+
 
 '''
 def get_syndrome(circuit, qutrits):
@@ -1111,6 +1081,7 @@ def get_syndrome_r(circuit, qutrits):
 
 '''
 
+
 def CCCCX(cirquit, q1, q2, q3, q4, q5):
     U1_clear(cirquit, q1, q2)
     U1_clear(cirquit, q2, q3)
@@ -1120,11 +1091,13 @@ def CCCCX(cirquit, q1, q2, q3, q4, q5):
     U1_c_clear(cirquit, q2, q3)
     U1_c_clear(cirquit, q1, q2)
 
+
 def CCCCZ(cirquit, q1, q2, q3, q4, q5):
     h = H()
     cirquit.append(h(q5), strategy=InsertStrategy.INLINE)
     CCCCX(cirquit, q1, q2, q3, q4, q5)
     cirquit.append(h(q5), strategy=InsertStrategy.INLINE)
+
 
 def CCCCY(cirquit, q1, q2, q3, q4, q5):
     h = H()
@@ -1184,7 +1157,6 @@ def error_correction(circuit, qutrits1):
     q3 = qutrits1[3]
     q4 = qutrits1[4]
 
-
     # Операции для исправления ошибок X
     circuit.append([x(q1)], strategy=InsertStrategy.INLINE)
     CCCCX(circuit, q1, q2, q3, q4, q0)
@@ -1201,7 +1173,6 @@ def error_correction(circuit, qutrits1):
     circuit.append([x(q2)], strategy=InsertStrategy.INLINE)
     CCCCX(circuit, q1, q2, q3, q4, q0)
     circuit.append([x(q2)], strategy=InsertStrategy.INLINE)
-
 
     # Операции для исправления ошибок Y
     circuit.append([x(q3)], strategy=InsertStrategy.INLINE)
@@ -1227,14 +1198,12 @@ def error_correction(circuit, qutrits1):
     CCCCZ(circuit, q1, q2, q3, q4, q0)
     circuit.append([x(q2), x(q4)], strategy=InsertStrategy.INLINE)
 
-
     circuit.append([x(q3), x(q4)], strategy=InsertStrategy.INLINE)
     CCCCZ(circuit, q1, q2, q3, q4, q0)
     circuit.append([x(q3), x(q4)], strategy=InsertStrategy.INLINE)
 
 
 def time_error(circuit, qutrits, t):
-
     p = np.exp(-t / T0)
     dpg_t = QutritDepolarizingChannel((1.000000000000001 - p))
     for q in qutrits:
@@ -1258,11 +1227,15 @@ def time_error(circuit, qutrits, t):
             circuit.append([er_gate(q)], strategy=InsertStrategy.INLINE)
         '''
 
+
 def error(circuit, qutrits, ind):
     if ind == 1:
         p = PMS1
     else:
         p = PMS2
+    dpg = QutritDepolarizingChannel(1.0000000000001 - p)
+    for q in qutrits:
+        circuit.append([dpg.on(q)], strategy=InsertStrategy.INLINE)
     dpg = QutritDepolarizingChannel(1.0000000000001 - p)
     for q in qutrits:
         circuit.append([dpg.on(q)], strategy=InsertStrategy.INLINE)
@@ -1289,27 +1262,29 @@ def error(circuit, qutrits, ind):
             circuit.append([er_gate(q)], strategy=InsertStrategy.INLINE)
     '''
 
+
 def X1_l(circuit, lqubits):
     x = X1()
     z = Z1()
     q1, q2, q3, q4, q5 = lqubits[0], lqubits[1], lqubits[2], lqubits[3], lqubits[4]
-    #gates = [z(q1), z(q4)]
-    adde(circuit, [z,z], [q1, q4], 1)
-    #circuit.append(gates, strategy=InsertStrategy.INLINE)
-    #gates = [x(q1), x(q2) ,x(q3) ,x(q4) ,x(q5)]
+    # gates = [z(q1), z(q4)]
+    adde(circuit, [z, z], [q1, q4], 1)
+    # circuit.append(gates, strategy=InsertStrategy.INLINE)
+    # gates = [x(q1), x(q2) ,x(q3) ,x(q4) ,x(q5)]
     adde(circuit, [x, x, x, x, x], [q1, q2, q3, q4, q5], 1)
-    #circuit.append(gates, strategy=InsertStrategy.INLINE)
+    # circuit.append(gates, strategy=InsertStrategy.INLINE)
+
 
 def Z1_l(circuit, lqubits):
     x = X1()
     z = Z1()
     q1, q2, q3, q4, q5 = lqubits[0], lqubits[1], lqubits[2], lqubits[3], lqubits[4]
-    #gates = [x(q1), x(q4)]
+    # gates = [x(q1), x(q4)]
     adde(circuit, [x, x], [q1, q4], 1)
-    #circuit.append(gates, strategy=InsertStrategy.INLINE)
+    # circuit.append(gates, strategy=InsertStrategy.INLINE)
     adde(circuit, [z], [q5], 1)
-    #gates = [z(q5)]
-    #circuit.append(gates, strategy=InsertStrategy.INLINE)
+    # gates = [z(q5)]
+    # circuit.append(gates, strategy=InsertStrategy.INLINE)
 
 
 # def make_error(p):
@@ -1334,19 +1309,19 @@ for i in range(10):
     qutrits1.append(cirq.LineQid(i, dimension=3))
 '''
 # кодируемое состояние
-#gates1 = [h(qutrits1[0])]
-#circuit1.append(gates1)
-#encoding_qubit(circuit1, qutrits1)
-# ошибка
-#gates1 = [z(qutrits1[4])]
+# gates1 = [h(qutrits1[0])]
 # circuit1.append(gates1)
-#xxx = TwoQuditMSGate3()
-#adde(circuit1, [xxx], [qutrits1[1], qutrits1[2]], 2)
-#adde(circuit1, [h, h, h], [qutrits1[3], qutrits1[2], qutrits1[4]], 1)
+# encoding_qubit(circuit1, qutrits1)
+# ошибка
+# gates1 = [z(qutrits1[4])]
+# circuit1.append(gates1)
+# xxx = TwoQuditMSGate3()
+# adde(circuit1, [xxx], [qutrits1[1], qutrits1[2]], 2)
+# adde(circuit1, [h, h, h], [qutrits1[3], qutrits1[2], qutrits1[4]], 1)
 # error_correction(circuit1, qutrits1)
 
 # error(circuit1, qutrits1, 0.5)
-#decoding_qubit(circuit1, qutrits1)
+# decoding_qubit(circuit1, qutrits1)
 # circuit1.append([cirq.measure(qutrits1[1])])
 # circuit1.append([cirq.measure(qutrits1[2])])
 # circuit1.append([cirq.measure(qutrits1[3])])
@@ -1365,8 +1340,11 @@ res1 = sim.simulate(circuit1)
 measured_bit = res1.measurements[str(qutirts1[4])][0]
 print(f'Measured bit: {measured_bit}')
 '''
-def m(a ,b, c, d, e):
+
+
+def m(a, b, c, d, e):
     return np.kron(np.kron(np.kron(np.kron(a, b), c), d), e)
+
 
 def partial_trace(rho_ab):
     tr = np.eye(3) - np.eye(3)
@@ -1376,15 +1354,19 @@ def partial_trace(rho_ab):
                 tr = tr + np.kron(A[i].T, B[k].T) @ rho_ab @ np.kron(A[j], B[k]) * A[i] @ A[j].T
     return tr
 
+
 sps1 = []
 sps2 = []
 
-def run_circit(t, N):
+
+def run_circit(t, N, t_t):
+    ans = 0
     fidelity = 0
     sch = 0
     for alf1 in np.linspace(0, 2 * np.pi, N):
         for alf2 in np.linspace(0, np.pi, N // 2):
             alf2 = alf2 + np.pi / N
+            fidelity = 0
             # alf1 = random.randint(0, 1000) / 1000 * 2 * np.pi
             # alf2 = random.randint(0, 1000) / 1000 * 2 * np.pi
             sch += 1
@@ -1401,33 +1383,69 @@ def run_circit(t, N):
 
             pg = U(povorot)
             circuit1.append([pg(qutrits1[0])], strategy=InsertStrategy.INLINE)
+            razb = []
 
-            encoding_qubit(circuit1, qutrits1)
-            er_q1 = int(random.randint(0, 4))
-            er_q2 = int(random.randint(0, 4))
-            if er_q2 == er_q1:
-                er_q2 += 1
-                er_q2 = er_q2 % 5
-            er_q3 = int(random.randint(0, 4))
-            if er_q3 == er_q2 or er_q3 == er_q1:
-                er_q3 = (max(er_q1, er_q2) + 1) % 5
-            time_error(circuit1, [qutrits1[er_q1], qutrits1[er_q2]], t)
-            # circuit1.append([y(qutrits1[2])])
-            decoding_qubit(circuit1, qutrits1)
-            error_correction(circuit1, qutrits1)
+            razb.append(t_t)
+            if t % t_t > 0.1 * t_t:
+                razb.append(t % t_t)
+            for t_takt in [razb[0]]:
+                encoding_qubit(circuit1, qutrits1)
+                er_q1 = int(random.randint(0, 4))
+                er_q2 = int(random.randint(0, 4))
+                if er_q2 == er_q1:
+                    er_q2 += 1
+                    er_q2 = er_q2 % 5
+                er_q3 = int(random.randint(0, 4))
+                if er_q3 == er_q2 or er_q3 == er_q1:
+                    er_q3 = (max(er_q1, er_q2) + 1) % 5
+                time_error(circuit1, qutrits1, t_takt)
+                # circuit1.append([y(qutrits1[2])])
+                decoding_qubit(circuit1, qutrits1)
+                error_correction(circuit1, qutrits1)
 
-            # !
+                # !
 
-            povorot_r = R(alf1, -alf2, 0, 1)
-            pg_r = U(povorot_r)
-            circuit1.append([pg_r(qutrits1[0])], strategy=InsertStrategy.INLINE)
+                povorot_r = R(alf1, -alf2, 0, 1)
+                pg_r = U(povorot_r)
+                circuit1.append([pg_r(qutrits1[0])], strategy=InsertStrategy.INLINE)
 
-            ro_ab = cirq.final_density_matrix(circuit1, qubit_order=qutrits1)
+                ro_ab = cirq.final_density_matrix(circuit1, qubit_order=qutrits1)
 
-            mat_0 = partial_trace(np.array(ro_ab))
-            # print(mat_0)
-            fidelity += abs(mat_0[0][0])
-    return fidelity / sch
+                mat_0 = partial_trace(np.array(ro_ab))
+                # print(mat_0)
+                fidelity += abs(mat_0[0][0])
+            fidelity = fidelity ** (t // t_t)
+
+            fidelity1 = 1
+            if len(razb) > 1:
+                for t_takt in [razb[1]]:
+                    encoding_qubit(circuit1, qutrits1)
+                    er_q1 = int(random.randint(0, 4))
+                    er_q2 = int(random.randint(0, 4))
+                    if er_q2 == er_q1:
+                        er_q2 += 1
+                        er_q2 = er_q2 % 5
+                    er_q3 = int(random.randint(0, 4))
+                    if er_q3 == er_q2 or er_q3 == er_q1:
+                        er_q3 = (max(er_q1, er_q2) + 1) % 5
+                    time_error(circuit1, qutrits1, t_takt)
+                    # circuit1.append([y(qutrits1[2])])
+                    decoding_qubit(circuit1, qutrits1)
+                    error_correction(circuit1, qutrits1)
+
+                    # !
+
+                    povorot_r = R(alf1, -alf2, 0, 1)
+                    pg_r = U(povorot_r)
+                    circuit1.append([pg_r(qutrits1[0])], strategy=InsertStrategy.INLINE)
+
+                    ro_ab = cirq.final_density_matrix(circuit1, qubit_order=qutrits1)
+
+                    mat_0 = partial_trace(np.array(ro_ab))
+                    # print(mat_0)
+                    fidelity1 = abs(mat_0[0][0])
+            ans += fidelity * fidelity1
+    return ans / sch
 
 
 def run_single_qudit(t, N):
@@ -1466,17 +1484,17 @@ def run_single_qudit(t, N):
     return fidelity / sch
 
 
-def main(T, k, N):
+def main(T, k, N, t_t):
     code_line = []
     single_qudit_line = []
-    for t_ in np.linspace(0, T, k):
-        print(t_)
+    for t__ in np.linspace(0, T, k):
+        print(t__)
         # code_line.append(run_circit(t_, N))
         N = 2
-        code_line.append(run_circit(t_, N))
+        code_line.append(run_circit(t__, N, t_t))
         # code_line.append(0.5)
         N = 20
-        single_qudit_line.append(run_single_qudit(t_, N))
+        single_qudit_line.append(run_single_qudit(t__, N))
     '''
     print(code_line)
     print(single_qudit_line)
@@ -1496,12 +1514,18 @@ def main(T, k, N):
     return code_line, single_qudit_line, np.linspace(0, T, k)
 
 
-def graph(c, s, t):
+def graph(line, line2, c, s, t):
     fig = plt.figure(figsize=(7, 4))
     ax = fig.add_subplot()
     ax.scatter(t, s, color='b', s=5, label='без коррекции')
     ax.scatter(t, c, color='r', s=5, label='c коррекции')
-
+    # ax.plot(t, line, color='g', label='теор')
+    # ax.plot(t, line2, color='black', label='теор2')
+    print(line)
+    print(line2)
+    print(c)
+    print(s)
+    print(t)
     ax.set_xlabel('t, mcs (T0 = 25 mcs)')
     ax.set_ylabel('fidelity')
     plt.title('P1 = 1, P2 = 1, amplitude damping (two-qutrit error)')
@@ -1511,19 +1535,6 @@ def graph(c, s, t):
     plt.show()
 
 
-PMS1 = 1
-PMS2 = 1
-
-nn = 2
-T = 300
-# c = [(0.8565517202725534+3.395137123470405e-08j), (0.7195716415300618+2.1850220699353334e-10j), (0.599032604033861-2.345406221093399e-09j), (0.5222457941217726-1.7974584144362756e-09j), (0.4899097485445054+1.6283321192778794e-09j), (0.4898734727162264-5.299983852578137e-10j), (0.48510653972061846+2.123842613722725e-09j), (0.48112311625148624+7.388549248671417e-10j), (0.4902382209378023+2.910851000013422e-09j), (0.48332990607195825-3.3510880924009664e-09j), (0.4806859651293962-9.44438148354458e-10j), (0.48183611255929765-4.409083452501381e-09j), (0.4760857342883658-1.1525566063163228e-09j), (0.4722917696447742+2.55770145740292e-10j), (0.47302660028390164+1.5277126690625012e-09j), (0.4654884947155248-5.280128293801107e-09j), (0.47168131055317036-1.2135048989432287e-09j), (0.4688896764914716+2.324239438993144e-09j), (0.4635384561408197-5.114246990133735e-09j), (0.45816098383769105+7.744124710456607e-10j)]
-# s = [(0.9999993046124775-1.546850529130041e-08j), (0.8734378417332966+3.945847797205134e-09j), (0.7709030310312907+1.0565259047239592e-18j), (0.6878337264060974+4.867137063769291e-09j), (0.6205344001452128+2.5756173489889494e-09j), (0.5660114089647929-3.2946397091985582e-09j), (0.5218391418457031+1.094105907723361e-09j), (0.48605262239774066-7.872636140215938e-09j), (0.45705993970235187-3.92671936633171e-11j), (0.4335712492465973-2.9606396975227303e-09j), (0.41454172134399414+8.409256670634708e-10j), (0.39912482102711994+6.954834856169137e-11j), (0.3866346478462219-1.0067211185053417e-09j), (0.3765157163143158+1.4064110612945127e-09j), (0.3683176736036936+3.3446373076713562e-09j), (0.36167605717976886-3.457652571666377e-09j), (0.35629530747731525+4.0823362121300555e-09j), (0.3519360323746999+3.570069869359334e-09j), (0.3484043478965759-1.5906890619514038e-09j), (0.3455430765946706-2.5427838538464676e-10j)]
-t = np.linspace(0, 200, 10)
-
-
-# main(T, 20, N)
-#c, s, t = main(T, 10, nn)
-#graph(c,s,t)
 
 def graph_3d(ms1, ms2, kms, T, nn, k):
     code_surf = []
@@ -1551,9 +1562,21 @@ def graph_3d(ms1, ms2, kms, T, nn, k):
     plt.grid()
     plt.show()
 
+sim = cirq.Simulator()
 
-PMS1 = 0.995
-PMS2 = 0.95
-c,s,t = main(100, 5, N)
-graph(c,s,t)
+circuit1 = cirq.Circuit()
+qutrits1 = []
+qutrits1.append(cirq.LineQid(0, dimension=3))
+qutrits1.append(cirq.LineQid(1, dimension=3))
+qutrits1.append(cirq.LineQid(2, dimension=3))
+qutrits1.append(cirq.LineQid(3, dimension=3))
+q1, q2, q3= qutrits1[0], qutrits1[1], qutrits1[2]
+x01 = X1()
+#x12 = X12()
+#x02 = X02()
+circuit1.append([x01(q1)], strategy=InsertStrategy.INLINE)
+#circuit1.append([x01(q2)], strategy=InsertStrategy.INLINE)
+CX_clear(circuit1,q1,q2)
+res1 = sim.simulate(circuit1)
+print(res1)
 

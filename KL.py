@@ -418,7 +418,7 @@ class TwoQuditMSGate01_c(gate_features.TwoQubitGate
 class TwoQS(gate_features.TwoQubitGate
                       ):
 
-    def __init__(self, coaf, diag_i='XX'):
+    def __init__(self, coaf, diag_i='XX0101'):
         #self.mat = mat
         self.diag_info = diag_i
         self.coaf = coaf
@@ -832,38 +832,121 @@ class Hr(cirq.Gate):
     def _circuit_diagram_info_(self, args):
         return 'U_enc'
 
+def R_level_r(fi, hi, i=0, j=1):
+    if hi < 0:
+        i = 1
+        j = 2
+    else:
+        i = 0
+        j = 2
+    N = 3
+    if i == j:
+        return np.eye(N)
+    if i > j:
+        i, j = j, i
+    x_for_ms = np.zeros((N, N))
+    x_for_ms[i][j] = 1
+    x_for_ms[j][i] = 1
+    y_for_ms = np.zeros((N, N))
+    y_for_ms[i][j] = -1
+    y_for_ms[j][i] = 1
+    y_for_ms = y_for_ms * 1j
+
+    m = np.cos(fi) * x_for_ms + np.sin(fi) * y_for_ms
+
+    return linalg.expm(-1j * m * hi / 2)
+
+def R_level(fi, hi, i=0, j=1):
+    if hi >0:
+        i = 1
+        j = 2
+    else:
+        i = 0
+        j = 2
+    N = 3
+    if i == j:
+        return np.eye(N)
+    if i > j:
+        i, j = j, i
+    x_for_ms = np.zeros((N, N))
+    x_for_ms[i][j] = 1
+    x_for_ms[j][i] = 1
+    y_for_ms = np.zeros((N, N))
+    y_for_ms[i][j] = -1
+    y_for_ms[j][i] = 1
+    y_for_ms = y_for_ms * 1j
+
+    m = np.cos(fi) * x_for_ms + np.sin(fi) * y_for_ms
+
+    return linalg.expm(-1j * m * hi / 2)
+
 
 
 def encoding(cirquit, mask, q_mask, v):
     for o in range(B):
-        u1 = U(R(v[0 + o * 12], v[1 + o * 12], mask[o][0], mask[o][1]), 'Rx(-π)12')
-        u2 = U(R(v[2 + o * 12], v[3 + o * 12], mask[o][0], mask[o][1]), 'Ry(π/2)01')
-        u3 = U(R(v[4 + o * 12], v[5 + o * 12], mask[o][0], mask[o][1]), 'Rx(-π)01')
-        u4 = U(R(v[6 + o * 12], v[7 + o * 12], mask[o][2], mask[o][3]), 'Ry(-π/2)01')
-        u5 = U(R(v[8 + o * 12], v[9 + o * 12], mask[o][2], mask[o][3]), 'Rx(-π)01')
-        u6 = U(R(v[10 + o * 12], v[11 + o * 12], mask[o][2], mask[o][3]), 'Ry(-π/2)01')
+        dln = 8
+        u11 = U(R(0, np.pi, mask[o][0], mask[o][1]), f'Rx(π){mask[o][0], mask[o][1]}')
+        u21 = U(R(0, np.pi, mask[o][2], mask[o][3]), f'Rx(π){mask[o][2], mask[o][3]}')
+
+
+        u1 = U(R(v[0 + o * dln], v[1 + o * dln], 0, 1), 'R(π/2)(π/2)12')
+        u2 = U(R(v[2 + o * dln], v[3 + o * dln], 0, 1), 'R(π/2)(-π/2)01')
+        u4 = U(R(v[4 + o * dln], v[5 + o * dln], 0, 1), 'R(0.82π)(0)01')
+        u5 = U(R(v[6 + o * dln], v[7 + o * dln], 0, 1), 'R(π)(-π)01')
+
+
+        u11r = U(R(0, -np.pi, mask[o][0], mask[o][1]), f'Rx(-π){mask[o][0], mask[o][1]}')
+        u21r = U(R(0, -np.pi, mask[o][2], mask[o][3]), f'Rx(-π){mask[o][2], mask[o][3]}')
+
+
+        xx = TwoQS([0, 1, 0, 1])
+        cirquit.append([u11(q_mask[o][0]), u21(q_mask[o][1])], strategy=InsertStrategy.INLINE)
+
+
+        cirquit.append([u1(q_mask[o][0]), u4(q_mask[o][1])], strategy=InsertStrategy.INLINE)
+        cirquit.append([xx(q_mask[o][0], q_mask[o][1])], strategy=InsertStrategy.INLINE)
+        cirquit.append([u2(q_mask[o][0]), u5(q_mask[o][1])], strategy=InsertStrategy.INLINE)
+
+
+        cirquit.append([u11r(q_mask[o][0]), u21r(q_mask[o][1])], strategy=InsertStrategy.INLINE)
+
+'''
+def encoding(cirquit, mask, q_mask, v):
+    for o in range(B):
+        dln = 10
+        u1 = U(R(v[0 + o * dln], v[1 + o * dln], mask[o][0], mask[o][1]), 'Rx(-π)12')
+        u2 = U(R(v[2 + o * dln], v[3 + o * dln], mask[o][0], mask[o][1]), 'Ry(π/2)01')
+        #u3 = U(R(v[4 + o * dln], v[5 + o * dln], mask[o][0], mask[o][1]), 'Rx(-π)01')
+        u4 = U(R(v[6 + o * dln], v[7 + o * dln], mask[o][2], mask[o][3]), 'Ry(-π/2)01')
+        u5 = U(R(v[8 + o * dln], v[9 + o * dln], mask[o][2], mask[o][3]), 'Rx(-π)01')
+        #u6 = U(R(v[10 + o * dln], v[11 + o * dln], mask[o][2], mask[o][3]), 'Ry(-π/2)01')
         xx = TwoQS([mask[o][0], mask[o][1], mask[o][2], mask[o][3]])
         cirquit.append([u1(q_mask[o][0]), u4(q_mask[o][1])], strategy=InsertStrategy.INLINE)
         cirquit.append([xx(q_mask[o][0], q_mask[o][1])], strategy=InsertStrategy.INLINE)
         cirquit.append([u2(q_mask[o][0]), u5(q_mask[o][1])], strategy=InsertStrategy.INLINE)
-        cirquit.append([u3(q_mask[o][0]), u6(q_mask[o][1])], strategy=InsertStrategy.INLINE)
+        #cirquit.append([u3(q_mask[o][0]), u6(q_mask[o][1])], strategy=InsertStrategy.INLINE)
 
         #([np.pi / 2, np.pi / 2,0,-np.pi, np.pi / 2, -np.pi / 2, 0, 0,0, -np.pi, 0, 0])
-
-
-
+'''
+'''
+def unitary3():
+    return np.array([[a / (), , ],
+                    [b, , ],
+                    [c, , ]])
+'''
 
 
 def decoding(cirquit, mask, q_mask, v):
     for o in range(B-1,-1,-1):
-        u1 = U(R(v[0 + o * 12], -v[1 + o * 12], mask[o][0], mask[o][1]), 'Rx(-π)12')
-        u2 = U(R(v[2 + o * 12], -v[3 + o * 12], mask[o][0], mask[o][1]), 'Ry(π/2)01')
-        u3 = U(R(v[4 + o * 12], -v[5 + o * 12], mask[o][0], mask[o][1]), 'Rx(-π)01')
-        u4 = U(R(v[6 + o * 12], -v[7 + o * 12], mask[o][2], mask[o][3]), 'Ry(-π/2)01')
-        u5 = U(R(v[8 + o * 12], -v[9 + o * 12], mask[o][2], mask[o][3]), 'Rx(-π)01')
-        u6 = U(R(v[10 + o * 12], -v[11 + o * 12], mask[o][2], mask[o][3]), 'Ry(-π/2)01')
+        dln = 10
+        u1 = U(R(v[0 + o * dln], -v[1 + o * dln], mask[o][0], mask[o][1]), 'Rx(-π)12')
+        u2 = U(R(v[2 + o * dln], -v[3 + o * dln], mask[o][0], mask[o][1]), 'Ry(π/2)01')
+        #u3 = U(R(v[4 + o * dln], -v[5 + o * dln], mask[o][0], mask[o][1]), 'Rx(-π)01')
+        u4 = U(R(v[6 + o * dln], -v[7 + o * dln], mask[o][2], mask[o][3]), 'Ry(-π/2)01')
+        u5 = U(R(v[8 + o * dln], -v[9 + o * dln], mask[o][2], mask[o][3]), 'Rx(-π)01')
+        #u6 = U(R(v[10 + o * dln], -v[11 + o * dln], mask[o][2], mask[o][3]), 'Ry(-π/2)01')
         xx = rTwoQS([mask[o][0], mask[o][1], mask[o][2], mask[o][3]])
-        cirquit.append([u3(q_mask[o][0]), u6(q_mask[o][1])], strategy=InsertStrategy.INLINE)
+       # cirquit.append([u3(q_mask[o][0]), u6(q_mask[o][1])], strategy=InsertStrategy.INLINE)
         cirquit.append([u2(q_mask[o][0]), u5(q_mask[o][1])], strategy=InsertStrategy.INLINE)
         cirquit.append([xx(q_mask[o][0], q_mask[o][1])], strategy=InsertStrategy.INLINE)
         cirquit.append([u1(q_mask[o][0]), u4(q_mask[o][1])], strategy=InsertStrategy.INLINE)
@@ -887,62 +970,106 @@ x12 = X12()
 x02 = X02()
 hr = Hr()
 h = H()
-
+opp = 0
+plotus = []
 def operation(v):
+    vsp = []
+    for i in range(B):
+        vsp.append(v)
+    vsp = np.array(vsp)
+    v = np.reshape(vsp, (1, B * 8))[0]
+
     #print(1)
-    circuit1 = cirq.Circuit()
-    qutrits1 = []
-    qutrits1.append(cirq.LineQid(0, dimension=3))
-    qutrits1.append(cirq.LineQid(1, dimension=3))
-    qutrits1.append(cirq.LineQid(2, dimension=3))
-    qutrits1.append(cirq.LineQid(3, dimension=3))
-    #qutrits1.append(cirq.LineQid(4, dimension=3))
-    #qutrits1.append(cirq.LineQid(5, dimension=3))
-    #qutrits1.append(cirq.LineQid(6, dimension=3))
-    q1, q2, q3= qutrits1[0], qutrits1[1], qutrits1[2]
-    q4 = qutrits1[3]
+
     #q5, q6, q7 = qutrits1[4], qutrits1[5], qutrits1[6]
 
-    Q_mask = [(q1,q3), (q3,q1), (q2,q3), (q3,q2), (q1,q2), (q2,q1)]
-    Q_mask = [(q1, q3), (q3, q1), (q2, q3), (q3, q2), (q1, q2)]
-    mask = [(0,2,0,2), (0,1,0,1), (0,2,1,2),(0,1,0,1), (0,2,0,2), (0,1,0,1)]
-    mask = [(0, 2, 0, 2), (0, 1, 0, 1), (0, 2, 1, 2), (0, 1, 0, 1), (0, 2, 0, 2)]
+    #Q_mask = [(q1,q3), (q3,q1), (q2,q3), (q3,q2), (q1,q2), (q2,q1)]
+    #Q_mask = [(q1, q3), (q3, q1), (q2, q3), (q3, q2), (q1, q2)]
+    mask = [(1,2,1,2), (0,0,0,0), (1,2,0,2),(0,0,0,0), (1,2,1,2), (0,0,0,0)]
+    #mask = [(0, 2, 0, 2), (0, 1, 0, 1), (0, 2, 1, 2), (0, 1, 0, 1), (0, 2, 0, 2)]
 
     # cмена нач сост:
+    '''
     circuit1.append([h(q1)], strategy=InsertStrategy.INLINE)
     circuit1.append([h(q2)], strategy=InsertStrategy.INLINE)
     circuit1.append([h(q3)], strategy=InsertStrategy.INLINE)
-    #CX_clear01(circuit1, q5, q1)
-    #CX_clear01(circuit1, q6, q2)
-    #CX_clear01(circuit1, q7, q3)
+    '''
+    ans = 0
+    for i1 in range(2):
+        for i2 in range(2):
+            for i3 in range(2):
 
-    encoding(circuit1, mask, Q_mask, v)
-    #q1, q4 = q4, q1
-    Q_mask = [(q4, q3), (q3, q4), (q2, q3), (q3,q2), (q4, q2), (q2, q4)]
-    Q_mask = [(q4, q3), (q3, q4), (q2, q3), (q3, q2), (q4, q2)]
-    decoding(circuit1, mask, Q_mask, v)
+                circuit1 = cirq.Circuit()
+                qutrits1 = []
+                qutrits1.append(cirq.LineQid(0, dimension=3))
+                qutrits1.append(cirq.LineQid(1, dimension=3))
+                qutrits1.append(cirq.LineQid(2, dimension=3))
+                #qutrits1.append(cirq.LineQid(3, dimension=3))
+                # qutrits1.append(cirq.LineQid(4, dimension=3))
+                # qutrits1.append(cirq.LineQid(5, dimension=3))
+                # qutrits1.append(cirq.LineQid(6, dimension=3))
+                q1, q2, q3 = qutrits1[0], qutrits1[1], qutrits1[2]
+                #q4 = qutrits1[3]
+                # q5, q6, q7 = qutrits1[4], qutrits1[5], qutrits1[6]
 
-    #CX_clear01(circuit1, q5, q4)
-    #CX_clear01(circuit1, q6, q2)
-    #CX_clear01(circuit1, q7, q3)
-    circuit1.append([hr(q3)], strategy=InsertStrategy.INLINE)
-    circuit1.append([hr(q2)], strategy=InsertStrategy.INLINE)
-    circuit1.append([hr(q4)], strategy=InsertStrategy.INLINE)
+                Q_mask = [(q1, q3), (q3, q1), (q2, q3)]
+                Q_mask = [(q1, q3), (q3, q1), (q2, q3), (q3, q2), (q1, q2)]
+                Q_mask = [(q1, q3), (q3, q1), (q2, q3), (q3, q2), (q1, q2), (q2, q1)]
+                #Q_mask = [(q1, q3), (q3, q1), (q2, q3), (q3, q2)]
 
-    ro_ab = cirq.final_density_matrix(circuit1, qubit_order=qutrits1)
-    return abs(abs(ro_ab[0][0]) - 1)
+                #mask = [(0, 2, 0, 2), (0, 1, 0, 1), (0, 2, 1, 2)]
+                #mask = [(0, 2, 0, 2), (0, 1, 0, 1), (0, 2, 1, 2), (0, 1, 0, 1), (0, 2, 0, 2)]
+                #mask = [(0, 2, 0, 2), (0, 1, 0, 1), (0, 2, 1, 2), (0, 1, 0, 1), (0, 2, 0, 2), (0, 1, 0, 1)]
+                #guess = [np.pi / 2, np.pi / 2, 0, 0] + [0, 0, 0, 0] + [np.pi / 2, 0, 0, np.pi/2] + [0, 0, 0,0] + [np.pi / 2, np.pi / 2, 0, 0]  + [0, 0, 0, 0]
 
-B = 5
+                #mask = [(0, 2, 0, 2), (0, 1, 0, 1), (0, 2, 1, 2), (0, 1, 0, 1)]
+                #mask = [(0, 2, 0, 2), (0, 1, 0, 1), (0, 2, 0, 1), (0, 1, 1, 2), (0, 2, 0, 2), (0, 1, 0, 1)]
 
+                for j in range(i1):
+                    circuit1.append([x01(q1)], strategy=InsertStrategy.INLINE)
+                for j in range(i2):
+                    circuit1.append([x01(q2)], strategy=InsertStrategy.INLINE)
+                for j in range(i3):
+                    circuit1.append([x01(q3)], strategy=InsertStrategy.INLINE)
+
+                encoding(circuit1, mask, Q_mask, v)
+                # q1, q4 = q4, q1
+                #Q_mask = [(q4, q3), (q3, q4), (q2, q3), (q3, q2), (q4, q2), (q2, q4)]
+                # Q_mask = [(q4, q3), (q3, q4), (q2, q3), (q3, q2), (q4, q2)]
+                #decoding(circuit1, mask, Q_mask, v)
+                '''
+                for j in range(i1):
+                    circuit1.append([x01(q4)], strategy=InsertStrategy.INLINE)
+                for j in range(i2):
+                    circuit1.append([x01(q2)], strategy=InsertStrategy.INLINE)
+                for j in range(i3):
+                    circuit1.append([x01(q3)], strategy=InsertStrategy.INLINE)
+
+                '''
+                ro_ab = cirq.final_state_vector(circuit1, qubit_order=qutrits1)
+                ans += abs((ro_ab[9:] * np.conj(ro_ab[9:])).sum())
+
+    plotus.append(ans/8)
+    print(ans / 8)
+    #print(ans, v[0], v[10])
+    return ans / 8
+
+B = 6
+
+guess =np.array([np.pi / 2, np.pi / 2,0,-np.pi, np.pi / 2, -np.pi / 2, 0, 0,0, -np.pi, 0, 0,np.pi / 2, np.pi / 2,0,-np.pi, np.pi / 2, -np.pi / 2, 0, 0,0, -np.pi, 0, 0,np.pi / 2, np.pi / 2,0,-np.pi, np.pi / 2, -np.pi / 2, 0, 0,0, -np.pi, 0, 0,np.pi / 2, np.pi / 2,0,-np.pi, np.pi / 2, -np.pi / 2, 0, 0,0, -np.pi, 0, 0,np.pi / 2, np.pi / 2,0,-np.pi, np.pi / 2, -np.pi / 2, 0, 0,0, -np.pi, 0, 0,np.pi / 2, np.pi / 2,0,-np.pi, np.pi / 2, -np.pi / 2, 0, 0,0, -np.pi, 0, 0])[:12 * B]
+
+#guess =np.array([np.pi / 2, np.pi / 2,0,-np.pi, np.pi / 2, -np.pi / 2, 0, 0,0, -np.pi, 0, 0,np.pi / 2, np.pi / 2,0,-np.pi, np.pi / 2, -np.pi / 2, 0, 0,0, -np.pi, 0, 0,np.pi / 2, np.pi / 2,0,-np.pi, np.pi / 2, -np.pi / 2, 0, 0,0, -np.pi, 0, 0,np.pi / 2, np.pi / 2,0,-np.pi, np.pi / 2, -np.pi / 2, 0, 0,0, -np.pi, 0, 0,np.pi / 2, np.pi / 2,0,-np.pi, np.pi / 2, -np.pi / 2, 0, 0,0, -np.pi, 0, 0])
 guess =np.array([np.pi / 2, np.pi / 2,0,-np.pi, np.pi / 2, -np.pi / 2, 0, 0,0, -np.pi, 0, 0,np.pi / 2, np.pi / 2,0,-np.pi, np.pi / 2, -np.pi / 2, 0, 0,0, -np.pi, 0, 0,np.pi / 2, np.pi / 2,0,-np.pi, np.pi / 2, -np.pi / 2, 0, 0,0, -np.pi, 0, 0,np.pi / 2, np.pi / 2,0,-np.pi, np.pi / 2, -np.pi / 2, 0, 0,0, -np.pi, 0, 0,np.pi / 2, np.pi / 2,0,-np.pi, np.pi / 2, -np.pi / 2, 0, 0,0, -np.pi, 0, 0,np.pi / 2, np.pi / 2,0,-np.pi, np.pi / 2, -np.pi / 2, 0, 0,0, -np.pi, 0, 0])
-guess =np.array([np.pi / 2, np.pi / 2,0,-np.pi, np.pi / 2, -np.pi / 2, 0, 0,0, -np.pi, 0, 0,np.pi / 2, np.pi / 2,0,-np.pi, np.pi / 2, -np.pi / 2, 0, 0,0, -np.pi, 0, 0,np.pi / 2, np.pi / 2,0,-np.pi, np.pi / 2, -np.pi / 2, 0, 0,0, -np.pi, 0, 0,np.pi / 2, np.pi / 2,0,-np.pi, np.pi / 2, -np.pi / 2, 0, 0,0, -np.pi, 0, 0,np.pi / 2, np.pi / 2,0,-np.pi, np.pi / 2, -np.pi / 2, 0, 0,0, -np.pi, 0, 0])
 
-delta = np.pi
-for i in range(60):
+guess = np.array(guess[0:8]) * 0
+delta = 2 *np.pi
+for i in range(8):
     guess[i] = guess[i] + random.randint(-1000, 1000) / 1000 * delta
 # guess.append(0.2)
 guess = np.array(guess)
-print(operation(guess))
+#gguess = guess
+#guess = np.zeros_like(guess)
+#print(operation(guess))
 #guess = [1.6542963267948965, 1.1982963267948965, 0.292, -2.9345926535897933, 1.7542963267948966, -1.9407963267948967, -0.4065, -0.477, 0.1035, -3.141592653589793, 0.2575001554317605, 0.2900001536802453, 1.4622963254144614, 1.9157963254144614, 0.09650016410849752, -3.141592653589793, 2.0707963267948966, -1.3817960830169056, 0.205, 0.125, 0.37949999861956496, -2.738592653589793, 0.1045, -0.3745, 1.4257963267948965, 2.0247963267948967, 0.405000147482576, -2.851592653589793, 1.9152963267948966, -1.9497963267948966, -0.145, 0.483, 0.4935, -3.141592653589793, 0.0225, -0.007000000000000009, 1.1577963267948965, 1.5392963267948965, -0.11200000138043503, -2.862592653589793, 1.2257963267948966, -1.6297963281753316, -0.331, 0.49599999861956495, 0.4075, -2.885592653589793, -0.389, 0.407, 1.7212963254144615, 1.9642963267948965, -0.456, -2.9910926522093577, 1.5942963281753315, -1.6907963267948967, -0.2555, 0.4705, 0.42500000138043503, -3.122592653589793, -0.38949999861956497, 0.2985]
 
 #guess = []
@@ -972,15 +1099,4 @@ for delta in adelta:
 
 
 '''
-bnds = []
-for i in range(60):
-    bnds.append((-np.pi, np.pi))
-
-res1 = scipy.optimize.minimize(operation, guess, method= 'COBYLA', bounds=bnds)
-print(res1)
-res2 = scipy.optimize.minimize(operation, res1.x, method= 'COBYLA', bounds=bnds)
-print(res2)
-print(list(res2.x))
-#print(operation([1.56034944490936, 1.6713713363054958, 0.033353477253745004, -2.914954278959774, 1.6551643536386802, -1.6229528312912576, 1.1402534799768376, -0.023164250236149198, 0.0668508887342963, -3.11742199917317, 0.8160411204140069, -0.347694132862265, 1.5007352845219337, 1.2764500659203686, 0.09245869417171074, -3.0603108954091924, 1.810680374406913, -1.7177804269443995, 1.26818662889559, 0.15521090221077433, 0.030849641302193892, -3.0147254726808534, -0.1689923362375981, 0.07668140312618128, 1.554729413190249, 1.533781800979779, -0.14763678403289027, -2.560900432791952, 1.309530707767151, -1.6506867080670322, 1.266000570099071, 0.27292890367515493, -0.2339887752328147, -3.07187293032482, 1.0172830846977041, -0.043663812683445026, 1.5784628711806037, 2.8304638802577804, 0.8211254068004148, -2.908575784234791, 1.2134840722475164, -1.3869706451884833, 0.2923658587541336, 0.15670854216145022, 1.6605543744132094, -2.9431829807310654, 1.553274584854197, -0.005771748274047021, 1.5827124861022375, 1.6205459940354674, -0.05781308688793942, -3.002438460258992, 1.4248868791932618, -1.5261262468264598, 0.02543457822646427, -0.43543381645935963, 0.1141050477028558, -2.992892299874643, 0.02113017182724401, 0.2963724910306603, 2.657238667601083, 1.839173770137152, 0.23068776653873185, -2.745769893414526, 1.955110292893974, -1.6849094018301993, 0.012185918249067163, 0.0717594823419049, 0.26068526987937163, -3.130326595808715, 1.3498810225108984, 0.003595254000454736]))
-#plt.scatter(adelta,1 - np.array(y), color = 'b', s = 5)
-#plt.show()
+ans = [ 1.571e+00,  1.571e+00,  1.571e+00, -1.571e+00,  2.587e+00, 1.289e-06, -1.611e+00, -3.142e+00]

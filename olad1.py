@@ -16,9 +16,17 @@ def sred(x,y, par):
     y = y[:len(y) - len(y) % par]
     return x[:len(x) - par:par], (np.reshape(y, (len(y) // par, par))).sum(axis=1) / par
 
-data = pd.read_csv('Problem_03_file_025.dat', sep='\t', header=None)
-x = data.iloc[:, 0].values
-y = data.iloc[:, 1].values
+x = np.array([])
+y = np.array([])
+for j in range(10,99):
+    i = j + 1
+    #fn1 = 'sf2/mwpower_scan_%i_signal.csv' % i
+    name = 'Problem_03_file_0%i.dat' % i
+    data = pd.read_csv(name, sep='\t', header=None)
+    x1 = np.array(data.iloc[:, 0].values)
+    y1 = np.array(data.iloc[:, 1].values)
+    x = np.concatenate((x, x1))
+    y = np.concatenate((y, y1))
 
 fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(12, 8))
 ax1.scatter(x, y, color='b', s=5)
@@ -40,7 +48,7 @@ print('b =',b, '+-',sb, '|', 'eps_b =', sb / abs(b) * 100, '%')
 #ax1.title('P1 = 0.99, depolarize')
 #plt.legend()
 #ax2.scatter(x, y - yt, color='b', s=5)
-noise1 = ax2.hist(y - yt, bins=40)
+noise1 = ax2.hist(y - yt, bins=500)
 #print(y - yt)
 def if_normal(noise):
     n_, amp_ = noise[0], noise[1][:-1]

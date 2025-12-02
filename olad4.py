@@ -19,9 +19,17 @@ def sred(x,y, par):
     return x[:len(x) - par:par], (np.reshape(y, (len(y) // par, par))).sum(axis=1) / par
 
 
-data = pd.read_csv('Problem_33_file_010.dat', sep='\t', header=None)
-x = data.iloc[:, 0].values
-y = data.iloc[:, 1].values
+x = np.array([])
+y = np.array([])
+for j in range(1,9):
+    i = j + 1
+    #fn1 = 'sf2/mwpower_scan_%i_signal.csv' % i
+    name = 'Problem_33_file_00%i.dat' % i
+    data = pd.read_csv(name, sep='\t', header=None)
+    x1 = np.array(data.iloc[:, 0].values)
+    y1 = np.array(data.iloc[:, 1].values)
+    x = np.concatenate((x, x1))
+    y = np.concatenate((y, y1))
 yf = rfft(y)
 spp = x.max() / len(x)
 xf = rfftfreq(len(x), spp)
@@ -50,7 +58,8 @@ for i in range(len(yf)):
 #ax3.scatter(xf, yf, color = 'r', s = 5)
 clear = irfft(yf)
 #print(len(xf))
-ax3.plot(x, clear, color = 'g')
+ax3.plot(x, clear, color = 'r')
+ax3.scatter(x, y, color = 'b', s=5)
 ax4.plot(x[5000:5100], clear[5000:5100], color = 'g')
 print('Первый сигнал: ')
 print('Амплитуда:', amp1.real)

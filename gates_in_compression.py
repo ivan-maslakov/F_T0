@@ -1,4 +1,6 @@
 import numpy as np
+
+import numpy as np
 import matplotlib.pyplot as plt
 from cirq.circuits import InsertStrategy
 import scipy
@@ -8,7 +10,7 @@ from cirq.testing import gate_features
 import random
 
 def printm(m):
-    print('np.array([', end='')
+    print('', end='')
     for line in m:
         print('[', end='')
         for i in range(len(line)-1):
@@ -80,67 +82,17 @@ def make_ms_matrix(N, fi, hi, i, j, k, l):
     m = -1j * m * hi
     return linalg.expm(m)
 
+def t(n):
+    if n == 0:
+        return '0'
+    nums = []
+    while n:
+        n, r = divmod(n, 3)
+        nums.append(str(r))
+    while len(nums) < 3:
+        nums.append(str(0))
+    return ''.join(reversed(nums))
 
-I = np.eye(3)
+printm(comp_m(make_ms_matrix(3, 0, np.pi/2, 0,1,0,1)))
 
-u1 = np.kron(R(0, -np.pi, 1, 2), I)
-u2 = np.kron(R(np.pi / 2, np.pi / 2, 0, 1), I)
-u3 = np.kron(R(0, -np.pi, 0, 1), R(0, -np.pi, 0, 1))
-u4 = np.kron(R(np.pi / 2, -np.pi / 2, 0, 1), I)
-u5 = np.kron(R(0, np.pi, 1, 2), I)
-xx01 = make_ms_matrix(3, 0, np.pi / 2,0,1,0,1)
-cx = u1 @ u2 @ xx01 @ u3 @ u4 @ u5
-
-u1 = np.kron(R(np.pi/2, np.pi / 2, 0, 1), I)
-u11 = np.kron(R(np.pi/2, -np.pi / 2, 0, 1), I)
-u3 = np.kron(R(0, -np.pi, 0, 1), R(0, -np.pi, 0, 1))
-xx01_ = make_ms_matrix(3, 0, np.pi / 2,0,1,0,1)
-
-c2x = u1 @ xx01_ @ u3 @ u11
-
-uu1 = np.kron(I, R(np.pi/2, np.pi / 2, 0, 2))
-uu11 = np.kron(I, R(np.pi/2, -np.pi / 2, 0, 2))
-uu3 = np.kron(R(0, -np.pi, 0, 1), R(0, -np.pi, 0, 2))
-xxu01_ = make_ms_matrix(3, 0, np.pi / 2,0,1,0,2)
-
-x1c = uu1 @ xxu01_ @ uu3 @ uu11
-
-uuu1 = np.kron(R(np.pi/2, np.pi / 2, 0, 2), I)
-uuu11 = np.kron(R(np.pi/2, -np.pi / 2, 0, 2), I)
-uuu3 = np.kron(R(0, -np.pi, 0, 2), R(0, -np.pi, 0, 1))
-xxuu01_ = make_ms_matrix(3, 0, np.pi / 2,0,2,0,1)
-
-c1x = uuu1 @ xxuu01_ @ uuu3 @ uuu11
-
-
-u1_ = np.kron(R(0, -np.pi, 1, 2), R(np.pi / 2, -np.pi, 0, 2))
-u2_ = np.kron(R(np.pi / 2, np.pi / 2, 0, 1), I)
-U1 = u1_ @ u2_ @ xx01
-
-x12 = R(0, np.pi, 1, 2)
-x02 = R(0, np.pi, 0, 2)
-
-ccx = np.kron(U1, I) @ np.kron(I, cx) @ np.kron(dag(U1), I)
-mod = np.kron(np.kron(R(0,np.pi,0,1) @ R(0,np.pi,1,2),R(0,np.pi,0,1) @ R(0,np.pi,1,2)), I)
-''' 
-swap12 = np.kron(np.array([
- [1, 0, 0, 0, 0, 0, 0, 0, 0],
- [0, 0, 0, 1, 0, 0, 0, 0, 0],
- [0, 0, 0, 0, 0, 0, 1, 0, 0],
- [0, 1, 0, 0, 0, 0, 0, 0, 0],
- [0, 0, 0, 0, 1, 0, 0, 0, 0],
- [0, 0, 0, 0, 0, 0, 0, 1, 0],
- [0, 0, 1, 0, 0, 0, 0, 0, 0],
- [0, 0, 0, 0, 0, 1, 0, 0, 0],
- [0, 0, 0, 0, 0, 0, 0, 0, 1]]), I)
- '''
-
-swap12 = np.kron(x1c@c1x@x1c@np.kron(x12,x12)@x1c@c1x@x1c@np.kron(x12,x12)@np.kron(x02,x02)@x1c@c1x@x1c@np.kron(x02,x02),I)
-
-print(cx)
-
-
-
-
-
-
+#wanted = np.ones(27)

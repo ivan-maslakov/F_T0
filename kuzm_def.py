@@ -196,24 +196,26 @@ class QuquartDepolarizingChannel(QuditGate):
         # Calculation of the parameter p based on average experimental error of single qudit gate
         f1 = 0.5
         self.p1 = (1 - f1) / (1 - 1 / self.d ** 2)
-
+        self.p1 = 0.9999
         # Choi matrix initialization
         if p_matrix is None:
             self.p_matrix = self.p1 / (self.d ** 2) * np.ones((self.d, self.d))
         else:
             self.p_matrix = p_matrix
         self.p_matrix[0, 0] += (1 - self.p1)  # identity probability
-        print('prob[0,0]', self.p_matrix[0, 0])
-        print('prob_sum', self.p_matrix.sum())
+        print(p_matrix)
+        print()
+        #print('prob[0,0]', self.p_matrix[0, 0])
+        #print('prob_sum', self.p_matrix.sum())
 
     def _mixture_(self):
         ps = []
         for i in range(self.d):
             for j in range(self.d):
                 op = np.kron(generalized_sigma(i, 0, 1, dimension=2), generalized_sigma(j, 0, 1, dimension=2))
-                print(np.trace(op) * self.p_matrix[i][j])
-                print(i, j)
-                print(op)
+                #print(np.trace(op) * self.p_matrix[i][j])
+                #print(i, j)
+                #print(op)
                 ps.append(op)
 
         print('total_sum', (np.trace(np.array(ps)) * self.p_matrix).sum())
@@ -233,6 +235,7 @@ class DoubleQuquartDepolarizingChannel(QuditGate):
         # Calculation of the parameter p2 based on average experimental error of two qudit gate
         f2 = 0.96
         self.p2 = (1 - f2) / (1 - 1 / (self.d ** 2) ** 2)
+        self.p2 = 0.9999
 
         # Choi matrix initialization
         self.p_matrix = self.p2 / 256 * np.ones((16, 16)) if p_matrix is None else p_matrix
@@ -255,21 +258,29 @@ class DoubleQuquartDepolarizingChannel(QuditGate):
         return f"ΦΦ(p2={self.p2:.3f})", f"ΦΦ(p2={self.p2:.3f})"
 
 
-if __name__ == '__main__':
-    n = 2  # number of qudits
-    d = 4  # dimension of qudits
+if __name__ == '__min__':
+    X = np.array([[0, 1, 0], [1, 0, 0], [0, 0, 1]])
+    Y = np.array([[0, complex(0, -1), 0], [complex(0, 1), 0, 0], [0, 0, 1]])
+    Z = np.array([[1, 0, 0], [0, -1, 0], [0, 0, 1]])
+    id = np.eye(3)
+    P = 0.9
+    n = 1  # number of qudits
+    d = 3  # dimension of qudits
 
-    q0, q1 = cirq.LineQid.range(n, dimension=d)
+    q0 = cirq.LineQid(0, dimension=d)
 
     print('Ququart single depolarization channel. f1 = 0.99')
     dpg = QuquartDepolarizingChannel()
+    ops = [id * (1 - P), X * P / 3, Y * P / 3, Z * P / 3]
+    x_meas = cirq.KrausChannel(ops, dimension = 3)
     #dpg._mixture_()
-    circuit = cirq.Circuit(dpg.on(q0))
-    print(circuit)
-    print()
-    print('final_trace', np.trace(cirq.final_density_matrix(circuit)))
+    circuit = cirq.Circuit(x_meas.on(q0))
+    #print(circuit)
+    #print()
+    #print('final_trace', np.trace(cirq.final_density_matrix(circuit)))
+    print(cirq.final_density_matrix(circuit))
 
-    print('choi')
+    #print('choi')
     f1 = 0.8
     f1 = 0.59
     p0 = (1 - f1) / (1 - 1 / 3 ** 2)
@@ -283,13 +294,30 @@ if __name__ == '__main__':
     id = np.eye(4)
     K0 = (1 - p0) ** 0.5 * id
     #K0 = id
-    K1 = p0 ** 0.5 / 3 ** 0.5 * x
-    #K1 = x
-    K2 = p0 ** 0.5 / 3 ** 0.5 * y
-    #K2 = y
-    K3 = p0 ** 0.5 / 3 ** 0.5 * z
-    #K3 = z
+    p1 = 0.5
+    Ea1 = 1 / 3**0.5 *np.array([[1, 0, 0], [0, (1 - p1) ** 0.5, 0], [0, 0, (1 - p1) ** 0.5]])
+    Ea2 = 1 / 3**0.5 * np.array([[0, p1 ** 0.5, 0], [0, 0, 0], [0, 0, 0]])
+    Ea3 = 1 / 3**0.5 * np.array([[0, 0, p1 ** 0.5], [0, 0, 0], [0, 0, 0]])
+print('gfsgir')
+from scipy import linalg
+def R(fi, hi, i=0, j=1):
+    N = 3
+    if i == j:
+        return np.eye(N)
+    if i > j:
+        i, j = j, i
+    x_for_ms = np.zeros((N, N))
+    x_for_ms[i][j] = 1
+    x_for_ms[j][i] = 1
+    y_for_ms = np.zeros((N, N))
+    y_for_ms[i][j] = -1
+    y_for_ms[j][i] = 1
+    y_for_ms = y_for_ms * 1j
 
-    print(cirq.kraus_to_choi([K0, K1, K2, K3]))
-    print(np.trace(cirq.kraus_to_choi([K0, K1, K2, K3])))
+    m = np.cos(fi) * x_for_ms + np.sin(fi) * y_for_ms
+
+    return linalg.expm(-1j * m * hi / 2)
+p = 0.5
+print(cirq.kraus_to_choi([p * np.array([[0, 1, 0], [1, 0, 0], [0, 0, 1]]), (1-p) * np.eye(3)]))
+    #print(np.trace(cirq.kraus_to_choi([Ea1, Ea2, Ea3])))
 

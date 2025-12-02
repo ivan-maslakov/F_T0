@@ -649,10 +649,7 @@ def main(PRESSURE):
 
     return answer
 
-plt.scatter(np.linspace(0,1,100), main(True), color = 'r')
-plt.scatter(np.linspace(0,1,100), main(False), color = 'b')
-#plt.scatter(np.linspace(0,1,100), 1 - np.linspace(0,1,100))
-plt.show()
+
 
 
 circuit1 = cirq.Circuit()
@@ -693,4 +690,19 @@ for i in range(27):
     for j in range(27):
         if ans[j] == 1:
             print(t(i), t(j))
+
+def comp_m(m):
+    real = (m + np.conj(m)) / 2
+    im = (m - np.conj(m)) / 2 * -1j
+    for i in range(len(real)):
+        for j in range(len(real)):
+            real[i][j] = np.round(real[i][j],2)
+    for i in range(len(im)):
+        for j in range(len(im)):
+            im[i][j] = np.round(im[i][j],2)
+    return real + 1j * im
+
+
+
+print(R(0,np.pi, 0, 1) @ R(np.pi/2,np.pi, 0, 1))
 

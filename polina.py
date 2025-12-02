@@ -798,61 +798,66 @@ for i1 in range(3):
     for i2 in range(3):
         B.append(np.kron(A[i1], A[i2]))
 
-
-sim = cirq.Simulator()
-
-circuit1 = cirq.Circuit()
-qutrits1 = []
-qutrits1.append(cirq.LineQid(0, dimension=3))
-qutrits1.append(cirq.LineQid(1, dimension=3))
-qutrits1.append(cirq.LineQid(2, dimension=3))
-qutrits1.append(cirq.LineQid(3, dimension=3))
-qutrits1.append(cirq.LineQid(4, dimension=3))
-qutrits1.append(cirq.LineQid(5, dimension=3))
-qutrits1.append(cirq.LineQid(6, dimension=3))
-
-q1, q2, q3= qutrits1[0], qutrits1[1], qutrits1[2]
-
-q4 = qutrits1[3]
-
-q5, q6, q7= qutrits1[4], qutrits1[5], qutrits1[6]
-x01 = X1()
-x12 = X12()
-h = H()
-
-# cмена нач сост:
-circuit1.append([h(q5)], strategy=InsertStrategy.INLINE)
-circuit1.append([h(q6)], strategy=InsertStrategy.INLINE)
-circuit1.append([h(q7)], strategy=InsertStrategy.INLINE)
-CX_clear01(circuit1, q5, q1)
-CX_clear01(circuit1, q6, q2)
-CX_clear01(circuit1, q7, q3)
-
-
-
-
 x01 = X1()
 x12 = X12()
 x02 = X02()
 hr = Hr()
 
-encoding(circuit1, q1,q2,q3)
+def operation(v):
 
-q1, q4 = q4, q1
+    #sim = cirq.Simulator()
+
+    circuit1 = cirq.Circuit()
+    qutrits1 = []
+    qutrits1.append(cirq.LineQid(0, dimension=3))
+    qutrits1.append(cirq.LineQid(1, dimension=3))
+    qutrits1.append(cirq.LineQid(2, dimension=3))
+    qutrits1.append(cirq.LineQid(3, dimension=3))
+    qutrits1.append(cirq.LineQid(4, dimension=3))
+    qutrits1.append(cirq.LineQid(5, dimension=3))
+    qutrits1.append(cirq.LineQid(6, dimension=3))
+
+    q1, q2, q3= qutrits1[0], qutrits1[1], qutrits1[2]
+
+    q4 = qutrits1[3]
+
+    q5, q6, q7= qutrits1[4], qutrits1[5], qutrits1[6]
+    x01 = X1()
+    x12 = X12()
+    h = H()
+
+    # cмена нач сост:
+    circuit1.append([h(q5)], strategy=InsertStrategy.INLINE)
+    circuit1.append([h(q6)], strategy=InsertStrategy.INLINE)
+    circuit1.append([h(q7)], strategy=InsertStrategy.INLINE)
+    CX_clear01(circuit1, q5, q1)
+    CX_clear01(circuit1, q6, q2)
+    CX_clear01(circuit1, q7, q3)
 
 
-decoding(circuit1, q1, q2, q3)
 
 
 
-CX_clear01(circuit1, q5, q1)
-CX_clear01(circuit1, q6, q2)
-CX_clear01(circuit1, q7, q3)
-circuit1.append([h(q5)], strategy=InsertStrategy.INLINE)
-circuit1.append([h(q6)], strategy=InsertStrategy.INLINE)
-circuit1.append([h(q7)], strategy=InsertStrategy.INLINE)
 
-res1 = sim.simulate(circuit1)
-ro_ab = cirq.final_density_matrix(circuit1, qubit_order=qutrits1)
+    encoding(circuit1, q1,q2,q3)
 
-print(ro_ab[0][0])
+    q1, q4 = q4, q1
+
+
+    decoding(circuit1, q1, q2, q3)
+
+
+
+    CX_clear01(circuit1, q5, q1)
+    CX_clear01(circuit1, q6, q2)
+    CX_clear01(circuit1, q7, q3)
+    circuit1.append([h(q5)], strategy=InsertStrategy.INLINE)
+    circuit1.append([h(q6)], strategy=InsertStrategy.INLINE)
+    circuit1.append([h(q7)], strategy=InsertStrategy.INLINE)
+
+    #res1 = sim.simulate(circuit1)
+    ro_ab = cirq.final_density_matrix(circuit1, qubit_order=qutrits1)
+
+    return abs(ro_ab[0][0] - 1)
+
+print(operation(0))

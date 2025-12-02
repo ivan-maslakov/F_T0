@@ -17,10 +17,17 @@ def sred(x,y, par):
     y = y[:len(y) - len(y) % par]
     return x[:len(x) - par:par], (np.reshape(y, (len(y) // par, par))).sum(axis=1) / par
 
-
-data = pd.read_csv('Problem_14_file_052.dat', sep='\t', header=None)
-x = data.iloc[:, 0].values
-y = data.iloc[:, 1].values
+x = np.array([])
+y = np.array([])
+for j in range(10,99):
+    i = j + 1
+    #fn1 = 'sf2/mwpower_scan_%i_signal.csv' % i
+    name = 'Problem_13_file_0%i.dat' % i
+    data = pd.read_csv(name, sep='\t', header=None)
+    x1 = np.array(data.iloc[:, 0].values)
+    y1 = np.array(data.iloc[:, 1].values)
+    x = np.concatenate((x, x1))
+    y = np.concatenate((y, y1))
 xm, ym = sred(x,y,15)
 mera = 0
 for i in range(len(y) - 1):
@@ -29,16 +36,18 @@ mera = mera ** 0.5 / (len(y) - 1)
 deg = 1
 while deg < 100:
     coef = np.polyfit(x, y, deg)
-    #print(coef)
+
     yt = np.zeros((1, len(y)))[0]
     for i in range(deg + 1):
         yt += coef[deg - i] * x**i
     srkv = (((y - yt)**2).sum())**0.5 / len(y)
-    print(srkv)
+    #print(srkv)
     if srkv / mera < 1:
         break
     deg += 1
 
+print('коэффициенты')
+print(coef)
 fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(12, 8))
 ax1.scatter(x, y, color='b', s=5)
 ax1.scatter(x, yt + srkv, color='g', s=5)
@@ -58,14 +67,14 @@ bins=int(180/5), color = 'blue',
 hist_kws={'edgecolor':'black'})
 '''
 #print(y - yt)
-noise1 = ax2.hist(y-yt,bins = 50, color = 'blue', edgecolor = 'black')
+noise1 = ax2.hist(y-yt,bins = 1000, color = 'blue')
 
 def if_normal(noise):
     n_, amp_ = noise[0], noise[1][:-1]
     n = []
     amp = []
     for i in range(len(n_)):
-        if n_[i] >2:
+        if n_[i] >10:
             n.append(n_[i])
             amp.append(amp_[i])
     amp = np.array(amp)

@@ -892,7 +892,7 @@ def encoding(cirquit, mask, q_mask, v):
         u1 = U(R(v[0 + o * dln], v[1 + o * dln], 0, 1), 'Rx(-π)12')
         u2 = U(R(v[2 + o * dln], v[3 + o * dln], 0, 1), 'Ry(π/2)01')
         u4 = U(R(v[4 + o * dln], v[5 + o * dln], 0, 1), 'Ry(-π/2)01')
-        u5 = U(R(v[6 + o * dln], v[7 + o * dln], 0, 1), 'Rx(-π)01')
+        u5 = U(R(0, v[7 + o * dln], 0, 1), 'Rx(-π)01')
 
 
         u11r = U(R(0, -np.pi, mask[o][0], mask[o][1]), 'Rx(-π)12')
