@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 Ivan Maslakov, Polyakova Polina Nikolaevna
+
 from qiskit import QuantumCircuit, execute, Aer
 import math
 
